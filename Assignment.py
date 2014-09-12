@@ -29,17 +29,16 @@ newdict = {}
 spell_mistake = 0
 New_Dict_Word = 0
 most_commonn_error = "a"
-Eng_Alphabets = 'abcdefghijklmnopqrstuvwxyz'
+alphabet = 'abcdefghijklmnopqrstuvwxyz'
 New_Added ={}
-def edit_distance1(word):
-    splited_words    = [(word[:i], word[i:]) for i in range(len(word) + 1)]
-    inserted_words    = [x + z + y     for x, y in splited_words for z in Eng_Alphabets]
-    replaced_words   = [x + z + y[1:] for x, y in splited_words for z in Eng_Alphabets if y]
-    transposed_words = [x + y[1] + y[0] + y[2:] for x, y in splited_words if len(y)>1]
-    deleted_words    = [x + y[1:] for x, y in splited_words if y]
-    return set(inserted_words+replaced_words+transposed_words+deleted_words)
-
-def dictionary_words(words):
+def edits1(word):
+    splits     = [(word[:i], word[i:]) for i in range(len(word) + 1)]
+    deletes    = [a + b[1:] for a, b in splits if b]
+    transposes = [a + b[1] + b[0] + b[2:] for a, b in splits if len(b)>1]
+    replaces   = [a + c + b[1:] for a, b in splits for c in alphabet if b]
+    inserts    = [a + c + b     for a, b in splits for c in alphabet]
+    return set(deletes + transposes + replaces + inserts)
+def known(words):
     return set(w for w in words if d.check(w))
 
 class listener(StreamListener):
@@ -61,7 +60,7 @@ class listener(StreamListener):
             if len(word)>2:
                 if not d.check(tweet1[k]):
                     No = No + 1
-                    if len(dictionary_words(edit_distance1(word)))>=1:
+                    if len(known(edits1(word)))>=1:
                         if newdict.get(word):
                             newdict[word] = newdict[word]+1
                         else :
